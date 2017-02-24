@@ -38,11 +38,10 @@ function CompanyDirectoryCtrl($filter) {
             organization: "<"
         },
         template:
-            "<p>To see a listing of all active members leave all fields blank. Currently we have {{ members.length }} members.</p>" +
+            "<p>Currently we have {{ members.length }} company members. See our affiliate members <a href='/affiliate-members'>here</a>.</p></p>" +
             "<div class='layout-row'>" +
-                "<div><select ng-model='searchObj.organization'><option value=''>All Organizations</option><option ng-repeat='o in organizations' ng-value='o'>{{ o }}</option></select></div>" +
+                "<div><select ng-model='searchObj.organization'><option value=''>All Companies</option><option ng-repeat='o in organizations' ng-value='o'>{{ o }}</option></select></div>" +
                 "<div><select ng-model='searchObj.organization_address_state'><option value=''>All States</option><option ng-repeat='s in states' ng-value='s'>{{ s }}</option></select></div>" +
-                "<div><select ng-show='searchObj.organization_address_state' ng-model='searchObj.organization_address_city'><option value=''>All Cities</option><option ng-repeat='c in cities' ng-value='c'>{{ c }}</option></select></div>" +
                 "<div><input type='search' ng-model='searchText' placeholder='Search'></div>" +
             "</div>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
@@ -50,13 +49,12 @@ function CompanyDirectoryCtrl($filter) {
                     "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='https://pbfa.memberclicks.net/membership/profile/{{ m.profile_id }}/avatar.jpg'></span></span>" +
                     "<div>" +
                         "<h3>{{ m.organization}}</h3>" +
-                        "<p ng-if='m.website_url'>{{ m.website_url }}</p>" +
                     "</div>" +
                 "</a>" +
             "</div>" +
-            "<div class='member-directory pagination'>" +
+            "<div class='member-directory pagination' ng-show='numberOfPages > 1'>" +
                 "<button type='button' ng-disabled='!currentPage' ng-click='currentPage=currentPage-1'>Prev</button>" +
-                "<button type='button' ng-disabled='$index === currentPage' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
+                "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
         link: MemberDirectoryListCtrl($filter)
@@ -72,11 +70,10 @@ function CompanyAffiliateDirectoryCtrl($filter) {
             organization: "<"
         },
         template:
-            "<p>To see a listing of all active members leave all fields blank. Currently we have {{ members.length }} company affiliates.</p>" +
+            "<p>Currently we have {{ members.length }} organizational affiliate members. See our company members <a href='/our-members'>here</a>.</p>" +
             "<div class='layout-row'>" +
-                "<div><select ng-model='searchObj.organization'><option value=''>All Organizations</option><option ng-repeat='o in organizations' ng-value='o'>{{ o }}</option></select></div>" +
+                "<div><select ng-model='searchObj.organization'><option value=''>All Companies</option><option ng-repeat='o in organizations' ng-value='o'>{{ o }}</option></select></div>" +
                 "<div><select ng-model='searchObj.organization_address_state'><option value=''>All States</option><option ng-repeat='s in states' ng-value='s'>{{ s }}</option></select></div>" +
-                "<div><select ng-show='searchObj.organization_address_state' ng-model='searchObj.organization_address_city'><option value=''>All Cities</option><option ng-repeat='c in cities' ng-value='c'>{{ c }}</option></select></div>" +
                 "<div><input type='search' ng-model='searchText' placeholder='Search'></div>" +
             "</div>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
@@ -87,9 +84,9 @@ function CompanyAffiliateDirectoryCtrl($filter) {
                     "</div>" +
                 "</a>" +
             "</div>" +
-            "<div class='member-directory pagination'>" +
+            "<div class='member-directory pagination' ng-show='numberOfPages > 1'>" +
                 "<button type='button' ng-disabled='!currentPage' ng-click='currentPage=currentPage-1'>Prev</button>" +
-                "<button type='button' ng-disabled='$index === currentPage' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
+                "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
         link: MemberDirectoryListCtrl($filter)
@@ -105,10 +102,7 @@ function IndividualAffiliateDirectoryCtrl($filter) {
             organization: "<"
         },
         template:
-            "<p>To see a listing of all active members leave all fields blank. Currently we have {{ members.length }} individual affiliates.</p>" +
-            "<div class='layout-row'>" +
-                "<div><input type='search' ng-model='searchText' placeholder='Search'></div>" +
-            "</div>" +
+            "<p>Currently we have {{ members.length }} individual affiliates members. See our company members <a href='/our-members'>here</a>.</p></p>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
                 "<div class='organization-card' ng-class='{disabled: !m.website_url}' ng-repeat='m in members | filter:searchText | filter:searchObj | orderBy:\"contact_name\" | startFrom:currentPage*pageSize | limitTo:pageSize'>" +
                     "<div>" +
@@ -116,9 +110,9 @@ function IndividualAffiliateDirectoryCtrl($filter) {
                     "</div>" +
                 "</div>" +
             "</div>" +
-            "<div class='member-directory pagination'>" +
+            "<div class='member-directory pagination' ng-show='numberOfPages > 1'>" +
                 "<button type='button' ng-disabled='!currentPage' ng-click='currentPage=currentPage-1'>Prev</button>" +
-                "<button type='button' ng-disabled='$index === currentPage' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
+                "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
             link: MemberDirectoryListCtrl($filter)
@@ -136,9 +130,8 @@ function MemberDirectoryCtrl($filter) {
         template:
             "<div class='members-table-search layout-row' ng-show='searchable'>" +
                 "<div><select ng-model='searchObj.member_type'><option value=''>All Member Types</option><option ng-repeat='t in memberTypes' ng-value='t'>{{ t }}</option></select></div>" +
-                "<div><select ng-model='searchObj.organization'><option value=''>All Organizations</option><option ng-repeat='o in organizations' ng-value='o'>{{ o }}</option></select></div>" +
+                "<div><select ng-model='searchObj.organization'><option value=''>All Companies</option><option ng-repeat='o in organizations' ng-value='o'>{{ o }}</option></select></div>" +
                 "<div><select ng-model='searchObj.organization_address_state'><option value=''>All States</option><option ng-repeat='s in states' ng-value='s'>{{ s }}</option></select></div>" +
-                "<div ng-show='searchObj.organization_address_state'><select ng-model='searchObj.organization_address_city'><option value=''>All Cities</option><option ng-repeat='c in cities' ng-value='c'>{{ c }}</option></select></div>" +
                 "<div><input type='search' ng-model='searchText' placeholder='Search'></div>" +
                 "<div flex><button type='button' ng-click='reset($event)' style='margin-top: 1px; height: 28px;'>Reset</button></div>" +
             "</div>" +
@@ -151,9 +144,9 @@ function MemberDirectoryCtrl($filter) {
                     "<td><a target='_blank' ng-if='m.organization_address_line_1' href='https://maps.google.com/?q={{ m.organization_address_line_1 }} {{ m.organization_address_city }} {{ m.organization_address_state }} {{ m.organization_address_zip }}'>{{ m.organization_address_line_1 }} {{ m.organization_address_city }} {{ m.organization_address_state }} {{ m.organization_address_zip }}</a></td>" +
                 "</tr>" +
             "</table>" +
-            "<div class='member-directory pagination'>" +
+            "<div class='member-directory pagination' ng-show='numberOfPages > 1'>" +
                 "<button type='button' ng-disabled='!currentPage' ng-click='currentPage=currentPage-1'>Prev</button>" +
-                "<button type='button' ng-disabled='$index === currentPage' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
+                "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
         link: MemberDirectoryListCtrl($filter)
@@ -166,7 +159,7 @@ function MemberDirectoryListCtrl($filter) {
     return function($scope, $element, $attrs) {
         angular.extend($scope, {
             reset: reset,
-            pageSize: 10,
+            pageSize: 20,
             currentPage: 0,
             numberOfPages: 1
         });

@@ -1,6 +1,6 @@
 .organization-card {
     background: #fff;
-    width: 200px;
+    width: calc(20% - 12px);
     max-width: 100%;
     box-shadow: 0 1px 3px 0 rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
     border-radius: 2px;
@@ -56,13 +56,14 @@ table.members-table th {
     display: none;
 }
 
-individual-affiliate-directory input[type=search],
-company-affiliate-directory input[type=search],
-company-directory input[type=search],
-member-directory input[type=search] {
+.wp-admin individual-affiliate-directory input[type=search],
+.wp-admin company-affiliate-directory input[type=search],
+.wp-admin company-directory input[type=search],
+.wp-admin member-directory input[type=search] {
     height: 28px;
 }
 
+.member-directory.pagination .active,
 .member-directory.pagination button:hover {
     background-color: #719430;
     color: #fff;

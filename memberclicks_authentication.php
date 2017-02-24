@@ -4,7 +4,7 @@
  * @wordpress-plugin
  * Plugin Name:       Plant Based Foods MemberClicks Member Registry
  * Description:       Provides member directory functionality via MemberClicks
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Brad Berger
  * Author URI:        https://bradb.net
  * License:
@@ -19,6 +19,40 @@ if (!defined('WPINC')) {
 
 include_once __DIR__ . '/memberclicks.php';
 include_once __DIR__ . '/memberclicks-cache.php';
+
+// memberclicks_check_cached is run on each page load to ensure member data is up-to-date
+function memberclicks_check_cache() {
+    memberclicks_refresh_data();
+}
+
+// memberclicks_refresh_data forces a refresh of member data at least every day
+function memberclicks_refresh_data($force = false) {
+
+    $key = 'memberclicks_data_timestamp';
+    $lastRefreshed = get_option($key);
+    if ($force || !$lastRefreshed || (int) $lastRefreshed < strtotime('today', time())) {
+
+        // Update the value now to ensure that parallel requests don't take too long.
+        update_option($key, (string) time());
+
+        $mc = new MemberClicks(
+            get_option('memberclicks_org_id'),
+            get_option('memberclicks_client_id'),
+            get_option('memberclicks_client_secret')
+        );
+        $mc->auth();
+
+        // Cache
+        $cache = new MemberClicksCache();
+        $cache->clear();
+
+        // Get/write profiles
+        list($code, $profiles) = $mc->profiles();
+        if ($code === 200) {
+            file_put_contents(plugin_dir_path(__FILE__)."members.js", sprintf("window.members = JSON.parse('%s')", str_replace("'", "\'", json_encode($profiles))));
+        }
+    }
+}
 
 /**
  * top level menu
@@ -57,23 +91,10 @@ function memberclicks_auth_options_html() {
         update_option('memberclicks_client_secret', $_POST['clientsecret']);
     }
 
-
-    // Example of using to pull profiles.
-	$mc = new MemberClicks(
-	    get_option('memberclicks_org_id'),
-	    get_option('memberclicks_client_id'),
-	    get_option('memberclicks_client_secret')
-	);
-    $mc->auth();
-
-
     if (!empty($_POST['refreshcache'])) {
-        $cache = new MemberClicksCache();
-        $cache->clear();
-
+        memberclicks_refresh_data(true);
     }
 
-    list($code, $profiles) = $mc->profiles();
     ?>
     <div class="wrap">
     <h1>MemberClicks Directory and Settings</h1>
@@ -128,7 +149,6 @@ function memberclicks_auth_options_html() {
                 <div>
                     <?php submit_button(); ?>
                 </div>
-                <script>var members = JSON.parse('<?php echo str_replace("'", "\'", json_encode($profiles)); ?>');</script>
             </form>
         </div>
     </div>
@@ -136,12 +156,30 @@ function memberclicks_auth_options_html() {
     <?php
 }
 
+function company_directory_shortcode() {
+    return '<section ng-app="MemberDirectory"><company-directory searchable="true" member-type="\'Full Member\'"></company-directory></section>';
+}
+
+function affiliate_directory_shortcode() {
+    return '<section ng-app="MemberDirectory">
+        <h2>Company Affiliates</h2>
+        <company-affiliate-directory searchable="true" member-type="\'Organization Affiliate\'"></company-affiliate-directory>
+        <h2>Individual Affiliates</h2>
+        <individual-affiliate-directory searchable="true" member-type="\'Individual Affiliate\'"></individual-affiliate-directory>
+    </section>';
+}
+
 function memberclicks_enqueue_scripts() {
 	wp_enqueue_script('angular', 'https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js', null, '1.5.7', true);
-	wp_enqueue_script('member_directory', plugin_dir_url( __FILE__ ).'app.js', array('angular'), time(), true);
+	wp_enqueue_script('member_directory', plugin_dir_url( __FILE__ ).'members.js', array('angular'), time(), true);
+	wp_enqueue_script('member_data', plugin_dir_url( __FILE__ ).'app.js', array(), time(), true);
 	wp_enqueue_style('member_directory', plugin_dir_url(__FILE__).'app.css', array(), time(), 'all');
 }
 
 add_action('admin_menu', 'memberclicks_auth_options_page');
-add_action( 'admin_enqueue_scripts', 'memberclicks_enqueue_scripts');
+add_action('admin_enqueue_scripts', 'memberclicks_enqueue_scripts');
 add_action('wp_enqueue_scripts', 'memberclicks_enqueue_scripts');
+add_action('wp', 'memberclicks_check_cache');
+
+add_shortcode('company_directory', 'company_directory_shortcode');
+add_shortcode('affiliate_directory', 'affiliate_directory_shortcode');
