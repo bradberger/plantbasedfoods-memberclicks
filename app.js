@@ -46,7 +46,7 @@ function CompanyDirectoryCtrl($filter) {
             "</div>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
                 "<a class='organization-card with-image' ng-class='{disabled: !m.website_url}' target='_blank' ng-href='{{ m.website_url | url }}' ng-repeat='m in members | filter:searchText | filter:searchObj | orderBy:\"organization\" | startFrom:currentPage*pageSize | limitTo:pageSize'>" +
-                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='https://pbfa.memberclicks.net/membership/profile/{{ m.profile_id }}/avatar.jpg'></span></span>" +
+                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='/wp-content/plugins/plantbasedfoods-memberclicks/avatar.php?profile={{ m.profile_id }}'></span></span>" +
                     "<div>" +
                         "<h3>{{ m.organization}}</h3>" +
                     "</div>" +
@@ -78,7 +78,7 @@ function CompanyAffiliateDirectoryCtrl($filter) {
             "</div>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
                 "<a class='organization-card' ng-class='{disabled: !m.website_url}' target='_blank' ng-href='{{ m.website_url | url }}' ng-repeat='m in members | filter:searchText | filter:searchObj | orderBy:\"organization\" | startFrom:currentPage*pageSize | limitTo:pageSize'>" +
-                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='https://pbfa.memberclicks.net/membership/profile/{{ m.profile_id }}/avatar.jpg'></span></span>" +
+                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='/wp-content/plugins/plantbasedfoods-memberclicks/avatar.php?profile={{ m.profile_id }}'></span></span>" +
                     "<div>" +
                         "<p>{{ m.organization}}</p>" +
                     "</div>" +

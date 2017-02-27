@@ -10,6 +10,10 @@ class MemberClicks
 
     public function __construct($orgID, $clientID, $clientSecret)
     {
+        // Make sure the image directory exists.
+        @mkdir(dirname(__FILE__).'/assets');
+        @file_put_contents(dirname(__FILE__).'/avatar.php', '<?php ');
+
         $this->orgID = $orgID;
         $this->clientID = $clientID;
         $this->clientSecret = $clientSecret;
@@ -48,6 +52,7 @@ class MemberClicks
             $k = strtolower($k);
             $obj[$k] = $v;
         }
+        $obj['profile_url'] = plugin_dir_url(__FILE__).'avatar.php?profile'.$obj['profile_id'];
         return $obj;
     }
 
@@ -75,6 +80,7 @@ class MemberClicks
 
         // After that, then get the rest of the pages if there are more.
         $profiles = $this->formatProfiles($result->profiles);
+
         if ($result->totalPageCount > 1) {
             $pages = $result->totalPageCount+1;
             for ($i = 2; $i < $pages; $i++) {
@@ -89,12 +95,23 @@ class MemberClicks
             }
         }
 
+        // Store the profile images in the assets directory.
+        foreach($profiles as $profile) {
+            if ($profile['member_type'] !== 'Organization Affiliate' && $profile['member_type'] !== 'Full Member') {
+                continue;
+            }
+            $fn = plugin_dir_path(__FILE__).'assets/'.$profile['profile_id'].'.jpg';
+            $url = sprintf('https://pbfa.memberclicks.net/membership/profile/%s/avatar.jpg', $profile['profile_id']);//$profile['profile_id'];
+            file_put_contents($fn, file_get_contents($url));
+        }
+
         $this->cache->set('profiles', $profiles);
         return array(200, $this->filterProfiles($profiles, $memberType));
     }
 
     public function profile($profileID)
     {
+
         return $this->get(sprintf('/api/v1/profile/%s', $profileID));
     }
 
