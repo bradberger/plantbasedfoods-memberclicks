@@ -9,7 +9,7 @@
  * Author URI:        https://bradb.net
  * License:
  * License URI:
- * Text Domain:       plantbasedfoods-memberclicks
+ * Text Domain:       plantbasedfoods-member-directory
 */
 
 // If this file is called directly, abort.
@@ -45,11 +45,12 @@ function memberclicks_refresh_data($force = false) {
         // Cache
         $cache = new MemberClicksCache();
         $cache->clear();
+        @unlink(plugin_dir_path(__FILE__)."members.json");
 
         // Get/write profiles
         list($code, $profiles) = $mc->profiles();
         if ($code === 200) {
-            file_put_contents(plugin_dir_path(__FILE__)."members.js", sprintf("window.members = JSON.parse('%s')", str_replace("'", "\'", json_encode($profiles))));
+            file_put_contents(plugin_dir_path(__FILE__)."members.json", json_encode($profiles));
         }
     }
 }
@@ -63,7 +64,7 @@ function memberclicks_auth_options_page() {
         'Memberclicks API Authentication',
         'Memberclicks',
         'manage_options',
-        'plantbasedfoods-memberclicks',
+        'plantbasedfoods-member-directory',
         'memberclicks_auth_options_html',
         '',
         null
@@ -171,7 +172,6 @@ function affiliate_directory_shortcode() {
 
 function memberclicks_enqueue_scripts() {
 	wp_enqueue_script('angular', 'https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js', null, '1.5.7', true);
-	wp_enqueue_script('member_directory', plugin_dir_url( __FILE__ ).'members.js', array('angular'), time(), true);
 	wp_enqueue_script('member_data', plugin_dir_url( __FILE__ ).'app.js', array(), time(), true);
 	wp_enqueue_style('member_directory', plugin_dir_url(__FILE__).'app.css', array(), time(), 'all');
 }

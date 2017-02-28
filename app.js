@@ -25,12 +25,12 @@ function FilterURL() {
 function StartFromFilter() {
     return function(input, start) {
         start = +start; //parse to int
-        return input.slice(start);
+        return (input || []).slice(start);
     }
 }
 
-CompanyDirectoryCtrl.$inject = ["$filter"];
-function CompanyDirectoryCtrl($filter) {
+CompanyDirectoryCtrl.$inject = ["$filter", "$http"];
+function CompanyDirectoryCtrl($filter, $http) {
     return {
         scope: {
             searchable: "<",
@@ -46,7 +46,7 @@ function CompanyDirectoryCtrl($filter) {
             "</div>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
                 "<a class='organization-card with-image' ng-class='{disabled: !m.website_url}' target='_blank' ng-href='{{ m.website_url | url }}' ng-repeat='m in members | filter:searchText | filter:searchObj | orderBy:\"organization\" | startFrom:currentPage*pageSize | limitTo:pageSize'>" +
-                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='/wp-content/plugins/plantbasedfoods-memberclicks/avatar.php?profile={{ m.profile_id }}'></span></span>" +
+                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='/wp-content/plugins/plantbasedfoods-member-directory/avatar.php?profile={{ m.profile_id }}'></span></span>" +
                     "<div>" +
                         "<h3>{{ m.organization}}</h3>" +
                     "</div>" +
@@ -57,12 +57,12 @@ function CompanyDirectoryCtrl($filter) {
                 "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
-        link: MemberDirectoryListCtrl($filter)
+        link: MemberDirectoryListCtrl($filter, $http)
     }
 }
 
-CompanyAffiliateDirectoryCtrl.$inject = ["$filter"];
-function CompanyAffiliateDirectoryCtrl($filter) {
+CompanyAffiliateDirectoryCtrl.$inject = ["$filter", "$http"];
+function CompanyAffiliateDirectoryCtrl($filter, $http) {
     return {
         scope: {
             searchable: "<",
@@ -78,7 +78,7 @@ function CompanyAffiliateDirectoryCtrl($filter) {
             "</div>" +
             "<div class='layout-row layout-wrap layout-padding layout-align-cetner-center'>" +
                 "<a class='organization-card' ng-class='{disabled: !m.website_url}' target='_blank' ng-href='{{ m.website_url | url }}' ng-repeat='m in members | filter:searchText | filter:searchObj | orderBy:\"organization\" | startFrom:currentPage*pageSize | limitTo:pageSize'>" +
-                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='/wp-content/plugins/plantbasedfoods-memberclicks/avatar.php?profile={{ m.profile_id }}'></span></span>" +
+                    "<span class='avatar layout-row layout-align-center-center'><span><img ng-src='/wp-content/plugins/plantbasedfoods-member-directory/avatar.php?profile={{ m.profile_id }}'></span></span>" +
                     "<div>" +
                         "<p>{{ m.organization}}</p>" +
                     "</div>" +
@@ -89,12 +89,12 @@ function CompanyAffiliateDirectoryCtrl($filter) {
                 "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
-        link: MemberDirectoryListCtrl($filter)
+        link: MemberDirectoryListCtrl($filter, $http)
     }
 }
 
-IndividualAffiliateDirectoryCtrl.$inject = ["$filter"];
-function IndividualAffiliateDirectoryCtrl($filter) {
+IndividualAffiliateDirectoryCtrl.$inject = ["$filter", "$http"];
+function IndividualAffiliateDirectoryCtrl($filter, $http) {
     return {
         scope: {
             searchable: "<",
@@ -115,12 +115,12 @@ function IndividualAffiliateDirectoryCtrl($filter) {
                 "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
-            link: MemberDirectoryListCtrl($filter)
+            link: MemberDirectoryListCtrl($filter, $http)
     }
 }
 
-MemberDirectoryCtrl.$inject = ["$filter"];
-function MemberDirectoryCtrl($filter) {
+MemberDirectoryCtrl.$inject = ["$filter", "$http"];
+function MemberDirectoryCtrl($filter, $http) {
     return {
         scope: {
             searchable: "<",
@@ -149,12 +149,12 @@ function MemberDirectoryCtrl($filter) {
                 "<button type='button' ng-disabled='$index === currentPage' ng-class='{active: $index === currentPage}' ng-click='$parent.currentPage = $index' ng-repeat='i in pages track by $index'>{{ $index+1 }}</button>" +
                 "<button type='button' ng-disabled='currentPage==numberOfPages-1' ng-click='currentPage=currentPage+1'>Next</button>" +
             "</div>",
-        link: MemberDirectoryListCtrl($filter)
+        link: MemberDirectoryListCtrl($filter, $http)
     }
 }
 
 // MemberDirectoryListCtrl is shared by all directives.
-function MemberDirectoryListCtrl($filter) {
+function MemberDirectoryListCtrl($filter, $http) {
 
     return function($scope, $element, $attrs) {
         angular.extend($scope, {
@@ -170,26 +170,6 @@ function MemberDirectoryListCtrl($filter) {
             getMembers();
             reset();
         }
-
-        function getMembers() {
-            $scope.members = (window.members || []).filter(function(m) {
-                if (!$scope.memberType) {
-                    return true;
-                }
-                return $scope.memberType == m.member_type;
-            }).map(function(m) {
-                angular.forEach(["organization_address_city", "organization_address_state", "website_url"], function(k) {
-                    if ("undefined" === typeof m[k]) {
-                        m[k] = "";
-                    }
-                });
-                return m;
-            });
-        }
-
-        $scope.$watch("searchObj", calcNumberPages, true);
-        $scope.$watch("searchText", calcNumberPages);
-        $scope.$watch("members", calcNumberPages);
 
         function calcNumberPages() {
             $scope.currentPage = 0;
@@ -207,44 +187,78 @@ function MemberDirectoryListCtrl($filter) {
             };
         }
 
-        // Create a de-duped list of organizations
-        $scope.organizations = $scope.members.filter(function(m) {
-            return !$scope.memberType || m.member_type == $scope.memberType;
-        }).map(function(m) {
-            return m.organization;
-        }).filter(function(org, index, members) {
-            return org && members.indexOf(org) == index;
-        });
+        function getMembers() {
+            return $http.get("/wp-content/plugins/plantbasedfoods-member-directory/members.json").then(function(r) {
 
-        // Create a de-duped list of member types
-        $scope.memberTypes = $scope.members.filter(function(m) {
-            return !$scope.memberType || m.member_type == $scope.memberType;
-        }).map(function(m) {
-            return m.member_type;
-        }).filter(function(type, index, types) {
-           return type && types.indexOf(type) == index;
-        });
+                $scope.members = r.data.filter(function(m) {
+                    if (!$scope.memberType) {
+                        return true;
+                    }
+                    return $scope.memberType == m.member_type;
+                }).map(function(m) {
+                    angular.forEach(["organization_address_city", "organization_address_state", "website_url"], function(k) {
+                        if ("undefined" === typeof m[k]) {
+                            m[k] = "";
+                        }
+                    });
+                    return m;
+                });
 
-        $scope.states = $scope.members.filter(function(m) {
-            return !$scope.memberType || m.member_type == $scope.memberType;
-        }).map(function(m) {
-            return m.organization_address_state;
-        }).filter(function(type, index, types) {
-           return type && types.indexOf(type) == index;
-        }).sort();
+                // Create a de-duped list of organizations
+                $scope.organizations = $scope.members.filter(function(m) {
+                    return !$scope.memberType || m.member_type == $scope.memberType;
+                }).map(function(m) {
+                    return m.organization;
+                }).filter(function(org, index, members) {
+                    return org && members.indexOf(org) == index;
+                });
 
-        $scope.$watch("searchObj.organization_address_state", function(val) {
-            $scope.searchObj.organization_address_city = "";
-            $scope.cities = $scope.members.filter(function(m) {
-                if (!val) {
-                    return true;
-                }
-                return m.organization_address_state == val;
-            }).map(function(m) {
-                return m.organization_address_city;
-            }).filter(function(type, index, types) {
-               return type && types.indexOf(type) == index;
-            }).sort();
-        });
+                // Create a de-duped list of member types
+                $scope.memberTypes = $scope.members.filter(function(m) {
+                    return !$scope.memberType || m.member_type == $scope.memberType;
+                }).map(function(m) {
+                    return m.member_type;
+                }).filter(function(type, index, types) {
+                   return type && types.indexOf(type) == index;
+                });
+
+                $scope.states = $scope.members.filter(function(m) {
+                    return !$scope.memberType || m.member_type == $scope.memberType;
+                }).map(function(m) {
+                    return m.organization_address_state;
+                }).filter(function(type, index, types) {
+                   return type && types.indexOf(type) == index;
+                }).sort();
+
+                initWatchers();
+
+            });
+        }
+
+        var watching = false;
+        function initWatchers() {
+            if (watching) {
+                return;
+            }
+            watching = true;
+            $scope.$watch("searchObj", calcNumberPages, true);
+            $scope.$watch("searchText", calcNumberPages);
+            $scope.$watch("members", calcNumberPages);
+            $scope.$watch("searchObj.organization_address_state", function(val) {
+                $scope.searchObj.organization_address_city = "";
+                $scope.cities = $scope.members.filter(function(m) {
+                    if (!val) {
+                        return true;
+                    }
+                    return m.organization_address_state == val;
+                }).map(function(m) {
+                    return m.organization_address_city;
+                }).filter(function(type, index, types) {
+                   return type && types.indexOf(type) == index;
+                }).sort();
+            });
+        }
+
+
     }
 }
